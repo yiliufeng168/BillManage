@@ -1,4 +1,4 @@
-package com.ui;
+package com.ui.AddBills;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -7,42 +7,55 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
-import java.util.UUID;
 
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 
-import com.beans.Eventr;
+import com.beans.Action;
 import com.beans.User;
-import com.biz.BillBiz;
-import com.biz.EventBiz;
 
-public class SetEnterUi extends JDialog {
-	User loginUser=null;
-	String eventType=null;
-	int eventInt=0;
-	public SetEnterUi() {
+
+import com.service.ActionService;
+import com.service.BillService;
+import com.utils.UiUtils;
+
+/**
+ * 管理收支类型页面
+ */
+
+public class ActionSetUi extends JDialog {
+	//登陆用户
+	private User loginUser=null;
+	
+	//动作类型
+	private int actionType=0;
+
+	//所有动作列表
+	private List<Action> actionList;
+
+	//动作数据模型
+	private DefaultListModel<String>  actionDefaultListModel=new DefaultListModel<String>();
+
+	public ActionSetUi() {
 		// TODO 自动生成的构造函数存根
 	}
-	public SetEnterUi(JDialog fa,User loginUser,int eventType) {
+	public ActionSetUi(JFrame fa, User loginUser, int actionType) {
 		super(fa,true);
 		this.loginUser=loginUser;
-		this.eventType=(eventType==0)?"支出":"收入";
-		this.eventInt=eventType;
-		CreateJFrame(this.eventType+"类型管理");
-		initJFram();
-		
+		this.actionType=actionType;
+		initJFram(((actionType==0)?"支出":"收入")+"类型管理");
 	}
-	public void CreateJFrame(String title) {
+	public ActionSetUi(JDialog fa, User loginUser, int actionType) {
+		super(fa,true);
+		this.loginUser=loginUser;
+		this.actionType=actionType;
+		initJFram(((actionType==0)?"支出":"收入")+"类型管理");
+	}
+
+	public void initJFram(String title) {
 		setTitle(title);
 		setLayout(new BorderLayout()); // 边界布局
 		Container container = getContentPane();
@@ -51,60 +64,59 @@ public class SetEnterUi extends JDialog {
 		container.add(BorderLayout.CENTER, setCenter());// 设置页面中部
 		container.add(BorderLayout.SOUTH, setSouth()); // 设置页面南部
 		container.setBackground(Color.white);
-		
-	}
-	public void initJFram() {
 		setSize(600, 500);
 		setLocationRelativeTo(null);
 		setVisible(true);
 		setResizable(false); // 设置窗体大小不可变
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 	}
+	//窗体上方
 	private JPanel setNorth() {
 		JPanel jPanelNorth = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
-		
-		jPanelNorth.add(Ctrols.getTitleLabel(eventType+"类型管理"));
+		jPanelNorth.add(UiUtils.getTitleLabel(((actionType==0)?"支出":"收入")+"类型管理"));
 		return jPanelNorth;
 	}
+	//窗体中间
 	private JPanel setCenter() {
 		JPanel jc=new JPanel(new FlowLayout(FlowLayout.CENTER,50,50));
 		
 		JPanel jc2=new JPanel(new GridLayout(3,1,0,30));
-		
-		
-		List<Eventr> lis=EventBiz.getAllEvents(loginUser,eventInt);
-		DefaultListModel<Eventr> dlm=new DefaultListModel<Eventr>();
+
+		actionList= ActionService.getAllActions(loginUser,actionType);
+
 		int i=0;
-		for(Eventr li:lis) {
-			dlm.add(i++,li);
+		for(Action li:actionList) {
+			actionDefaultListModel.addElement(li.getName());
 		}
-		JList<Eventr> jl=new JList<Eventr>();
-		jl.setModel(dlm);
+		JList<String> jl=new JList<String>();
+		jl.setModel(actionDefaultListModel);
 		
-		jl.setFont(Ctrols.f16);
+		jl.setFont(UiUtils.f16);
 		
 		JScrollPane jcs=new JScrollPane(jl);
 		jcs.setPreferredSize(new Dimension(400,200));
 		
-		JButton jadd=Ctrols.getButton("添加");
+		JButton jadd= UiUtils.getButton("添加");
+
 		jadd.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO 自动生成的方法存根
-				String nEv=JOptionPane.showInputDialog(null,"请输入"+eventType+"类型","添加",JOptionPane.PLAIN_MESSAGE);
+				String nEv=JOptionPane.showInputDialog(null,"请输入"+((actionType==0)?"支出":"收入")+"类型","添加",JOptionPane.PLAIN_MESSAGE);
 				if(nEv!=null) {
 	
-					Eventr nEventr=new Eventr(null,loginUser.getUser_id(),nEv,eventInt);
-					if(!EventBiz.checkEventExist(nEventr)) {
-						nEventr.setEvent_id(EventBiz.registEv(nEventr));
-						dlm.add(dlm.getSize(), nEventr);
+					Action nAction =new Action(null,loginUser.getUser_id(),nEv,actionType);
+					if(!ActionService.checkActionExist(nAction)) {
+						ActionService.addAction(nAction);
+						updateActionBox();
+
 					}else {
 						JOptionPane.showMessageDialog(null, "类型重复","失败", JOptionPane.ERROR_MESSAGE);
 					}
 				}
 			}
 		});
-		JButton jedit=Ctrols.getButton("编辑");
+		JButton jedit= UiUtils.getButton("编辑");
 		jedit.addActionListener(new ActionListener() {
 			
 			@Override
@@ -112,19 +124,19 @@ public class SetEnterUi extends JDialog {
 				// TODO 自动生成的方法存根
 				int selectIndex=jl.getSelectedIndex();
 				if(selectIndex!=-1) {
-					Eventr f=dlm.getElementAt(selectIndex);
-					String nEv=(String) JOptionPane.showInputDialog(null,"请输入"+eventType+"类型","编辑",JOptionPane.PLAIN_MESSAGE,null,null,f.getEvent_name());
+					Action f=actionList.get(selectIndex);
+					String nEv=(String) JOptionPane.showInputDialog(null,"请输入"+((actionType==0)?"支出":"收入")+"类型","编辑",JOptionPane.PLAIN_MESSAGE,null,null,f.getName());
 					if(nEv!=null) {
-						f.setEvent_name(nEv);
-						EventBiz.modifyEv(f);
-						dlm.set(selectIndex, f);
+						f.setName(nEv);
+						ActionService.editAction(f);
+						actionDefaultListModel.set(selectIndex, f.getName());
 					}
 				}
 				
 
 			}
 		});
-		JButton jdel=Ctrols.getButton("删除");
+		JButton jdel= UiUtils.getButton("删除");
 		jdel.addActionListener(new ActionListener() {
 			
 			@Override
@@ -132,12 +144,12 @@ public class SetEnterUi extends JDialog {
 				// TODO 自动生成的方法存根
 				int selectIndex=jl.getSelectedIndex();
 				if(selectIndex!=-1) {
-					Eventr f=dlm.get(selectIndex);
-					if(BillBiz.checkEventIdExist(f.getEvent_id())) {
+					Action f=actionList.get(selectIndex);
+					if(BillService.checkActionIdExist(f.getId())) {
 						JOptionPane.showMessageDialog(null, "账单中包含该记录，无法删除","失败", JOptionPane.ERROR_MESSAGE);
 					}else {
-						EventBiz.delEv(f);
-						dlm.remove(selectIndex);
+						ActionService.delAction(f);
+						updateActionBox();
 					}
 
 				}
@@ -155,18 +167,27 @@ public class SetEnterUi extends JDialog {
 		JPanel jPs = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 20));
 		JPanel jpi=new JPanel(new GridLayout(2,1,100,10));
 		jPs.add(jpi);
-		JButton je=Ctrols.getButton("返回");
+		JButton je= UiUtils.getButton("返回");
 		je.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO 自动生成的方法存根
-				SetEnterUi.this.dispose();
+				ActionSetUi.this.dispose();
 			}
 		});
 		
 		jpi.add(je);
-		jpi.add(Ctrols.getLabel("                               "));
+		jpi.add(UiUtils.getLabel("                               "));
 		return jPs;
+	}
+
+	private void updateActionBox(){
+		actionList=ActionService.getAllActions(loginUser,actionType);
+		actionDefaultListModel.removeAllElements();
+		for (Action ac:actionList){
+			actionDefaultListModel.addElement(ac.getName());
+		}
+
 	}
 }

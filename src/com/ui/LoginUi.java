@@ -3,7 +3,10 @@ package com.ui;
 import javax.swing.*;
 
 import com.beans.User;
-import com.biz.UserBiz;
+
+import com.service.UserService;
+import com.ui.Register.RegistUI;
+import com.utils.UiUtils;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -11,7 +14,15 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 
-public class Ui extends JFrame {
+/**
+ * 登陆页面
+ * @author 易流锋
+ *
+ *
+ *
+ */
+
+public class LoginUi extends JFrame {
     private User user=new User();
  
     public void CreateJFrame(String title){
@@ -39,7 +50,7 @@ public class Ui extends JFrame {
     public JPanel setNorth(){
         //流式布局
         JPanel jPanelNorth=new JPanel(new FlowLayout(FlowLayout.CENTER,20,20));
-        jPanelNorth.add(Ctrols.getTitleLabel("个人记账系统"));
+        jPanelNorth.add(UiUtils.getTitleLabel("个人记账系统"));
         return jPanelNorth;
     }
     public JPanel setCenter(){
@@ -50,10 +61,10 @@ public class Ui extends JFrame {
         JPanel jc2=new JPanel(new GridLayout(2,1,0,30));
         jcol.add(jc1);
         jcol.add(jc2);
-        jc1.add(Ctrols.getLabel("用户名:"));
-        jc1.add(Ctrols.getLabel("密  码:"));
+        jc1.add(UiUtils.getLabel("用户名:"));
+        jc1.add(UiUtils.getLabel("密  码:"));
 
-        JTextField jt1=Ctrols.getJTextField();
+        JTextField jt1= UiUtils.getJTextField();
         jt1.setColumns(14);
         jt1.addFocusListener(new FocusAdapter() {
             @Override
@@ -62,7 +73,7 @@ public class Ui extends JFrame {
             }
         });
         jc2.add(jt1);
-        JPasswordField jPasswordField=Ctrols.getJPasswordField();
+        JPasswordField jPasswordField= UiUtils.getJPasswordField();
         jPasswordField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
@@ -80,8 +91,8 @@ public class Ui extends JFrame {
         JPanel jP=new JPanel(new GridLayout(2,1,0,30));
         JPanel jpL1=new JPanel(new FlowLayout(FlowLayout.CENTER,30,10));
         jP.add(jpL1);
-        jP.add(Ctrols.getLabel(""));
-        JButton jb1=Ctrols.getButton("登录");
+        jP.add(UiUtils.getLabel(""));
+        JButton jb1= UiUtils.getButton("登录");
         jb1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -93,29 +104,28 @@ public class Ui extends JFrame {
             		JOptionPane.showMessageDialog(null, "密码不能为空","登录失败", JOptionPane.ERROR_MESSAGE);
             		return;
             	}
-                User loginUser=UserBiz.Login(user);
+                User loginUser= UserService.login(user);
                 if(loginUser!=null){
-                    Menu menu=new Menu("菜单",loginUser);
+                    MenuUi menuUi =new MenuUi("菜单",loginUser);
                     JOptionPane.showMessageDialog(null, "欢迎进入");
                     
-                    Ui.this.dispose();
+                    LoginUi.this.dispose();
                 }else {
                 	JOptionPane.showMessageDialog(null, "用户名或密码错误","登录失败", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
-        JButton jb2=Ctrols.getButton("注册");
+        JButton jb2= UiUtils.getButton("注册");
         jb2.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("点击了注册");
-				RegistUI registUI=new RegistUI(Ui.this);
+				RegistUI registUI=new RegistUI(LoginUi.this);
 			}
 		});
         jpL1.add(jb1);
         jpL1.add(jb2);
-
         return jP;
     }
 

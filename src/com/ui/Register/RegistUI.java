@@ -1,4 +1,4 @@
-package com.ui;
+package com.ui.Register;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -28,7 +28,13 @@ import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
 import com.beans.User;
-import com.biz.UserBiz;
+
+import com.service.UserService;
+import com.utils.UiUtils;
+
+/**
+ * 注册页面
+ */
 
 public class RegistUI extends JDialog {
 	JFrame fatherJframe;
@@ -66,8 +72,8 @@ public class RegistUI extends JDialog {
 		JPanel jPs = new JPanel(new GridLayout(2,1,0,10));
 		JPanel jpL1=new JPanel(new FlowLayout(FlowLayout.CENTER,30,10));
 		jPs.add(jpL1);
-		jPs.add(Ctrols.getLabel(""));
-		JButton jb = Ctrols.getButton("注册");
+		jPs.add(UiUtils.getLabel(""));
+		JButton jb = UiUtils.getButton("注册");
 		jb.addActionListener(new ActionListener() {
 			
 			@Override
@@ -77,7 +83,7 @@ public class RegistUI extends JDialog {
 					if(f)i++;
 				}
 				if(i==6) {
-					UserBiz.regist(user);
+					UserService.regist(user);
 					JOptionPane.showMessageDialog(null, "注册成功");
 					RegistUI.this.dispose();
 				}else {
@@ -85,7 +91,7 @@ public class RegistUI extends JDialog {
 				}
 			}
 		});
-		JButton je=Ctrols.getButton("登录");
+		JButton je= UiUtils.getButton("登录");
 		je.addActionListener(new ActionListener() {
 			
 			@Override
@@ -106,20 +112,20 @@ public class RegistUI extends JDialog {
 		JPanel jpc2 = new JPanel(new GridLayout(6, 2, 0, 50));
 //		JPanel jpc3=new JPanel(new GridLayout(6, 1, 20, 50));	//存放提示
 
-		jpc1.add(Ctrols.getLabel("用户名:", new Font("微软雅黑", Font.PLAIN, 18)));
-		jpc1.add(Ctrols.getLabel("密    码:", new Font("微软雅黑", Font.PLAIN, 18)));
-		jpc1.add(Ctrols.getLabel("确认密码:", new Font("微软雅黑", Font.PLAIN, 18)));
-		jpc1.add(Ctrols.getLabel("性别:", new Font("微软雅黑", Font.PLAIN, 18)));
-		jpc1.add(Ctrols.getLabel("年龄:", new Font("微软雅黑", Font.PLAIN, 18)));
-		jpc1.add(Ctrols.getLabel("手机号:", new Font("微软雅黑", Font.PLAIN, 18)));
+		jpc1.add(UiUtils.getLabel("用户名:", new Font("微软雅黑", Font.PLAIN, 18)));
+		jpc1.add(UiUtils.getLabel("密    码:", new Font("微软雅黑", Font.PLAIN, 18)));
+		jpc1.add(UiUtils.getLabel("确认密码:", new Font("微软雅黑", Font.PLAIN, 18)));
+		jpc1.add(UiUtils.getLabel("性别:", new Font("微软雅黑", Font.PLAIN, 18)));
+		jpc1.add(UiUtils.getLabel("年龄:", new Font("微软雅黑", Font.PLAIN, 18)));
+		jpc1.add(UiUtils.getLabel("手机号:", new Font("微软雅黑", Font.PLAIN, 18)));
 
 		JLabel[] jmsg = new JLabel[6];
 		for (int i = 0; i < 6; i++) {
-			jmsg[i] = Ctrols.getLabel(" ");
+			jmsg[i] = UiUtils.getLabel(" ");
 			jmsg[i].setHorizontalAlignment(JLabel.LEFT);
 		}
 
-		JTextField jtUserName = Ctrols.getJTextField();
+		JTextField jtUserName = UiUtils.getJTextField();
 		jtUserName.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
@@ -127,7 +133,7 @@ public class RegistUI extends JDialog {
 				JTextField j = (JTextField) e.getSource();
 				if (j.getText().equals(""))
 					return;
-				if (UserBiz.checkName(j.getText())) {
+				if (UserService.checkUserName(j.getText())) {
 					user.setUser_name(j.getText());
 					flag[0] = true;
 					jmsg[0].setText("  √");
@@ -172,7 +178,7 @@ public class RegistUI extends JDialog {
 		bg.add(jrb1);
 		bg.add(jrb2);
 		jrb1.setSelected(true);
-		JTextField jtAge = Ctrols.getJTextField();
+		JTextField jtAge = UiUtils.getJTextField();
 		jtAge.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
@@ -193,7 +199,7 @@ public class RegistUI extends JDialog {
 				}
 			}
 		});
-		JTextField jtPhone = Ctrols.getJTextField();
+		JTextField jtPhone = UiUtils.getJTextField();
 		jtPhone.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
@@ -211,7 +217,7 @@ public class RegistUI extends JDialog {
 			}
 			
 		});
-		JPasswordField jtpa = Ctrols.getJPasswordField();
+		JPasswordField jtpa = UiUtils.getJPasswordField();
 		jtpa.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
@@ -228,7 +234,7 @@ public class RegistUI extends JDialog {
 				}
 			}
 		});
-		JPasswordField jtpaCheck = Ctrols.getJPasswordField();
+		JPasswordField jtpaCheck = UiUtils.getJPasswordField();
 		jtpaCheck.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
@@ -271,7 +277,7 @@ public class RegistUI extends JDialog {
 
 	private JPanel setNorth() {
 		JPanel jPanelNorth = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
-		jPanelNorth.add(Ctrols.getTitleLabel("用户注册"));
+		jPanelNorth.add(UiUtils.getTitleLabel("用户注册"));
 		return jPanelNorth;
 	}
 

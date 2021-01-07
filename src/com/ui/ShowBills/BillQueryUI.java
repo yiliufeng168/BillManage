@@ -1,4 +1,4 @@
-package com.ui;
+package com.ui.ShowBills;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -29,28 +29,40 @@ import javax.swing.WindowConstants;
 import javax.swing.table.DefaultTableModel;
 
 import com.beans.Bill;
-import com.beans.Eventr;
+import com.beans.Action;
 import com.beans.User;
-import com.biz.BillBiz;
-import com.biz.EventBiz;
+
+import com.service.ActionService;
+import com.service.BillService;
 import com.utils.DateConverUtils;
 
+import com.utils.MyWindowListener;
+import com.utils.UiUtils;
 import net.sourceforge.jdatepicker.impl.JDatePanelImpl;
 import net.sourceforge.jdatepicker.impl.JDatePickerImpl;
 import net.sourceforge.jdatepicker.impl.UtilDateModel;
 
+/**
+ * 账单查询页面
+ */
 
 public class BillQueryUI extends JDialog{
-	User loginUser=null;
-	String[] chooseList1= {"全部","支出","收入"};
-	List<Eventr> eventrs=null;
-	List<Bill> bills=null;
+	//当前登陆用户
+	private User loginUser=null;
+
+	//动作列表
+	private List<Action> actionList =null;		//存储当前收支类型下的事件
+	//账单列表
+	private List<Bill> billList=null;
+
+	//动作列表数据模型
+	private DefaultComboBoxModel<String> actionDefaultComboBoxModel=new DefaultComboBoxModel<String>();
 	
 	//账单类型，选择下拉框
-	JComboBox<String> jEventTypeBox=new JComboBox<String>(chooseList1);
+	JComboBox<String> jBillTypeBox=new JComboBox<String>(new String[]{"全部","支出","收入"});
 	
 	//类型列表选择下拉框（包含全部）
-	JComboBox<Eventr> jEventListBox=new JComboBox<Eventr>();
+	JComboBox<String> jActionListBox=new JComboBox<String>();
 	
 	//起始日期设置栏
 	UtilDateModel modelStart = new UtilDateModel();
@@ -63,18 +75,18 @@ public class BillQueryUI extends JDialog{
 	JDatePickerImpl jDateEnd=new JDatePickerImpl(dPImplEnd);
 	
 	//返回主菜单按钮
-	JButton jExit=Ctrols.getButton("返回主菜单");
+	JButton jExit= UiUtils.getButton("返回主菜单");
 	//查询按钮
-	JButton jQuery=Ctrols.getButton("查询");
+	JButton jQuery= UiUtils.getButton("查询");
 	//删除按钮
-	JButton jDel=Ctrols.getButton("删除");
+	JButton jDel= UiUtils.getButton("删除");
 	//编辑
-	JButton jEdit=Ctrols.getButton("编辑");
+	JButton jEdit= UiUtils.getButton("编辑");
 			
 	//最小金额
-	JTextField jMinMoney=Ctrols.getJTextField();
+	JTextField jMinMoney= UiUtils.getJTextField();
 	//最大金额
-	JTextField jMaxMoney=Ctrols.getJTextField();
+	JTextField jMaxMoney= UiUtils.getJTextField();
 	
 	//表格
 	JTable jtable=null;
@@ -83,17 +95,22 @@ public class BillQueryUI extends JDialog{
 	DefaultTableModel dtm=new DefaultTableModel();
 	
 	
-	JLabel jGet=Ctrols.getLabel("收入:",Ctrols.f24);
-	JLabel jPay=Ctrols.getLabel("支出:",Ctrols.f24);
-	JLabel jAll=Ctrols.getLabel("共计:",Ctrols.f24);
+	JLabel jGet= UiUtils.getLabel("收入:", UiUtils.f24);
+	JLabel jPay= UiUtils.getLabel("支出:", UiUtils.f24);
+	JLabel jAll= UiUtils.getLabel("共计:", UiUtils.f24);
+
+
 	public BillQueryUI(JFrame jffather,User loginUser) {
 		super(jffather,true);
 		this.loginUser=loginUser;
-		this.eventrs=EventBiz.getAllEvents(loginUser);
-		CreateJFrame("账单");
-		initJFram();
+		this.actionList = ActionService.getAllActions(loginUser);
+		addWindowListener(new MyWindowListener(jffather));
+		initJFram("账单");
 	}
-	public void CreateJFrame(String title) {
+
+
+	//初始化窗体设置
+	public void initJFram(String title) {
 		setTitle(title);
 		setLayout(new BorderLayout()); // 边界布局
 		Container container = getContentPane();
@@ -102,59 +119,68 @@ public class BillQueryUI extends JDialog{
 		container.add(BorderLayout.CENTER, setCenter());// 设置页面中部
 		container.add(BorderLayout.SOUTH, setSouth()); // 设置页面南部
 		container.setBackground(Color.white);
-	}
-	
-	public void initJFram() {
 		setSize(1600, 800);
 		setLocationRelativeTo(null);
 		setVisible(true);
 		setResizable(false); // 设置窗体大小不可变
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 	}
+	
+	//设置上方的布局
 	private JPanel setNorth() {
 		JPanel jpN=new JPanel(new FlowLayout(FlowLayout.CENTER,0,20));//第一层
 		JPanel jpni=new JPanel(new GridLayout(2,1,40,10));//第二层
 		jpN.add(jpni);
-		jpni.add(Ctrols.getTitleLabel(loginUser.getUser_name()+"的账单"));
+		jpni.add(UiUtils.getTitleLabel(loginUser.getUser_name()+"的账单"));
 		JPanel jpna=new JPanel(new GridLayout(2,8,20,10));//第三层
 		
 		jpni.add(jpna);
-		jpna.add(Ctrols.getLabel("账单类型:"));
-		jpna.add(jEventTypeBox);
-		jpna.add(Ctrols.getLabel("起始日期:"));
+		jpna.add(UiUtils.getLabel("账单类型:"));
+		jpna.add(jBillTypeBox);
+		
+		jpna.add(UiUtils.getLabel("起始日期:"));
 		jpna.add(jDateStart);
-		jpna.add(Ctrols.getLabel("最小金额:"));
+		jpna.add(UiUtils.getLabel("最小金额:"));
 		jpna.add(jMinMoney);
 		jpna.add(jQuery);
 		
-		jpna.add(Ctrols.getLabel("收支类型:"));
-		jpna.add(jEventListBox);
-		jpna.add(Ctrols.getLabel("截至日期:"));
+		jpna.add(UiUtils.getLabel("收支类型:"));
+		jpna.add(jActionListBox);
+		jpna.add(UiUtils.getLabel("截至日期:"));
 		jpna.add(jDateEnd);
-		jpna.add(Ctrols.getLabel("最大金额:"));
+		jpna.add(UiUtils.getLabel("最大金额:"));
 		jpna.add(jMaxMoney);
 		jpna.add(jExit);
-		List<Eventr> list=EventBiz.getAllEvents(loginUser);
-		jEventListBox.setModel(getComBoxModel(list));
+
+		//设置当前收支类型下的事件
+		jActionListBox.setModel(actionDefaultComboBoxModel);
+		actionList = ActionService.getAllActions(loginUser);
+		System.out.println("action:"+actionList);
+		updateActionsListBox();
+		jActionListBox.setFont(UiUtils.f16);
+		jBillTypeBox.setFont(UiUtils.f16);
 	
-		jEventListBox.setFont(Ctrols.f16);
-		jEventTypeBox.setFont(Ctrols.f16);
-	
-		jEventTypeBox.addItemListener(new ItemListener() {
+		//账单类型下拉框监听事件
+		jBillTypeBox.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				// TODO 自动生成的方法存根
 				if(e.getStateChange()==ItemEvent.SELECTED) {
-					if(jEventTypeBox.getSelectedIndex()==0) {
-						List<Eventr> list=EventBiz.getAllEvents(loginUser);
-						jEventListBox.setModel(getComBoxModel(list));
+
+					if(jBillTypeBox.getSelectedIndex()==0) {
+						//选择全部
+						actionList = ActionService.getAllActions(loginUser);
+						updateActionsListBox();
 					}else {
-						List<Eventr> list=EventBiz.getAllEvents(loginUser,jEventTypeBox.getSelectedIndex()-1);
-						jEventListBox.setModel(getComBoxModel(list));
+						//选择收入或者支出
+						actionList = ActionService.getAllActions(loginUser,jBillTypeBox.getSelectedIndex()-1);
+						updateActionsListBox();
 					}
 				}
 			}
 		});
+		
+		//查询按钮监听事件
 		jQuery.addActionListener(new ActionListener() {
 			
 			@Override
@@ -162,19 +188,21 @@ public class BillQueryUI extends JDialog{
 				// TODO 自动生成的方法存根
 				Float minMoney=null;
 				Float maxMoney=null;
+				
+				//验证最小金额
 				if(!jMinMoney.getText().equals("")) {
 					try {
 						minMoney=new Float(jMinMoney.getText());
 						if (minMoney<0) {
 							throw new Exception();
 						}
-
 					} catch (Exception e2) {
 						// TODO: handle exception
 						JOptionPane.showMessageDialog(null, "最小金额设置错误","查询失败", JOptionPane.ERROR_MESSAGE);
 						return;
 					}
 				}
+				//验证最大金额
 				if(!jMaxMoney.getText().equals("")) {
 					try {
 
@@ -188,19 +216,24 @@ public class BillQueryUI extends JDialog{
 						return;
 					}
 				}
-				Integer event_id=null;
-				if(jEventListBox.getSelectedIndex()!=0) {
-					Eventr temp=(Eventr)jEventListBox.getSelectedItem();
-					event_id=temp.getEvent_id();
+				//获取动作编号
+				Integer action_id=null;
+				if(jActionListBox.getSelectedIndex()!=0) {
+					int chooseEvent=jActionListBox.getSelectedIndex()-1;
+					action_id= actionList.get(chooseEvent).getId();
 				}
-				Integer event_type=null;
-				if(jEventTypeBox.getSelectedIndex()!=0) {
-					event_type=jEventTypeBox.getSelectedIndex()-1;
+				//获取账单类型
+				Integer bill_type=null;
+				if(jBillTypeBox.getSelectedIndex()!=0) {
+					bill_type=jBillTypeBox.getSelectedIndex()-1;
 				}
-				bills=BillBiz.getAllBilList(loginUser,event_type ,event_id, modelStart.getValue(), modelEnd.getValue(), minMoney, maxMoney);
+				billList= BillService.getAllBilList(loginUser,bill_type ,action_id, modelStart.getValue(), modelEnd.getValue(), minMoney, maxMoney);
+				System.out.println("点击查询按钮后bills");
+				System.out.println(billList);
 				dtm.setDataVector(getTableValue(),columnNameV);
 			}
 		});
+		//返回主菜单监听事件
 		jExit.addActionListener(new ActionListener() {
 			
 			@Override
@@ -209,26 +242,28 @@ public class BillQueryUI extends JDialog{
 				BillQueryUI.this.dispose();
 			}
 		});
-		
 		return jpN;
 	}
+	
+	//设置中间布局
 	private JPanel setCenter() {
 		JPanel jC=new JPanel(new BorderLayout());//第一层
 		columnNameV=new Vector<String>();
 		columnNameV.add("账单编号");
 		columnNameV.add("时间");
-		columnNameV.add("事件");
+
 		columnNameV.add("类型");
-		columnNameV.add("金额(￥)");
+		columnNameV.add("事件");
 		columnNameV.add("备注");
-		bills=BillBiz.getAllBilList(loginUser,null, null, null, null, null, null);
+		columnNameV.add("金额(￥)");
+		billList=BillService.getAllBilList(loginUser,null, null, null, null, null, null);
 		Vector<Vector<String>> tableValue=getTableValue();
 
 		dtm.setDataVector(tableValue,columnNameV);
 		jtable=new MyJtable();
 		jtable.setModel(dtm);
 		
-		jtable.setFont(Ctrols.f24);
+		jtable.setFont(UiUtils.f24);
 		jtable.setRowHeight(36);
 		jtable.setSelectionMode(0);//只允许选择一个
 		JScrollPane js=new JScrollPane(jtable);
@@ -238,8 +273,9 @@ public class BillQueryUI extends JDialog{
 		JPanel jright_in=new JPanel(new GridLayout(2,1,10,30));
 		jright.add(jright_in);
 		jright_in.add(jEdit);
+
+		//编辑按钮监听事件
 		jEdit.addActionListener(new ActionListener() {
-			
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO 自动生成的方法存根
@@ -247,20 +283,14 @@ public class BillQueryUI extends JDialog{
 					JOptionPane.showMessageDialog(null, "请选择要编辑的一行数据","编辑失败", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
-				int bill_id=Integer.parseInt(tableValue.elementAt(jtable.getSelectedRow()).elementAt(0));
-				for(Bill b:bills) {
-					if(b.getBill_id()==bill_id) {
-						
-						BillEditUi billEditUi=new BillEditUi(BillQueryUI.this,loginUser,b);
-						b=billEditUi.getBill();
-						break;
-					}
-				}
+				int select_bill_id=jtable.getSelectedRow();
+				BillEditUi billEditUi=new BillEditUi(BillQueryUI.this,loginUser,billList.get(select_bill_id));
+				billList.set(select_bill_id,billEditUi.getBill());
 				dtm.setDataVector(getTableValue(),columnNameV);
-				
 			}
 		});
 		jright_in.add(jDel);
+		//删除按钮监听事件
 		jDel.addActionListener(new ActionListener() {
 			
 			@Override
@@ -274,13 +304,12 @@ public class BillQueryUI extends JDialog{
 				int i=JOptionPane.showConfirmDialog(null, "确认删除？","删除",JOptionPane.YES_NO_OPTION);
 				System.out.println(i);
 				if(i==0) {
-					
-					
 					dtm.removeRow(jtable.getSelectedRow());
-					for(Bill b:bills) {
-						if(b.getBill_id()==bill_id) {
-							BillBiz.delBill(b);
-							bills.remove(b);
+
+					for(Bill b:billList) {
+						if(b.getId()==bill_id) {
+							BillService.delBill(b);
+							billList.remove(b);
 							break;
 						}
 					}
@@ -288,64 +317,64 @@ public class BillQueryUI extends JDialog{
 				}
 			}
 		});
-		
 		jC.add(BorderLayout.CENTER,js);
-		jC.add(BorderLayout.WEST, Ctrols.getLabel("                 "));
+		jC.add(BorderLayout.WEST, UiUtils.getLabel("                 "));
 		jC.add(BorderLayout.EAST,jright );
 		return jC;
 	}
+	
+	//设置下方布局
 	private JPanel setSouth() {
 		JPanel jps=new JPanel(new FlowLayout(FlowLayout.CENTER,20,30));
 		jps.add(jGet);
 		jps.add(jPay);
 		jps.add(jAll);
-		
-		
 		return jps;
 	}
-	private DefaultComboBoxModel<Eventr> getComBoxModel(List<Eventr> list){
-		DefaultComboBoxModel<Eventr> tdcm=new DefaultComboBoxModel<Eventr>();
-		int i=0;
-		Eventr temp=new Eventr();
-		temp.setEvent_name("--全部--");
-		tdcm.addElement(temp);
-		for(Eventr li:list) {
-			tdcm.addElement(li);
+	private void updateActionsListBox(){
+		actionDefaultComboBoxModel.removeAllElements();
+		actionDefaultComboBoxModel.addElement("--全部--");
+
+		for(Action li: actionList) {
+			actionDefaultComboBoxModel.addElement(li.getName());
 		}
-		return tdcm;
-		
 	}
 	private Vector<Vector<String>> getTableValue(){
 		Vector<Vector<String>> tv=new Vector<Vector<String>>();
 		float get=0f;
 		float pay=0f;
 		float all=0f;
-		for (Bill bill:bills ) {
-            String event_name=null;
-            String event_type=null;
-            Vector<String> rowV=new Vector<String>();
-            for (Eventr eventr:eventrs) {
-                if(eventr.getEvent_id()==bill.getEvent_id()){
-                    event_name=eventr.getEvent_name();
-                    if(eventr.getEvent_type().intValue()==0) {
-                    	pay=pay+bill.getMoney();
-                    	event_type="支出";
-                    }else {
-                    	get=get+bill.getMoney();
-                    	event_type="收入";
-                    }
-                    break;
-                }
-            }
-            all=get-pay;
-            rowV.add(bill.getBill_id().toString());
-            rowV.add(DateConverUtils.convertDateToString(bill.getBill_date()));
-            rowV.add(event_name);
-            rowV.add(event_type);
-            rowV.add(bill.getMoney().toString());
-            rowV.add(bill.getNote());
+		for (Bill bill:billList ) {
+            String action_name=null;
 
-         
+            String action_type_name=null;
+            Vector<String> rowV=new Vector<String>();
+            //遍历动作列表，找到账单类型，和动作名
+			for(int i=0;i<actionList.size();i++){
+				if(actionList.get(i).getId()==bill.getAction_id()){
+					action_name=actionList.get(i).getName();
+					int action_type=actionList.get(i).getType();
+					action_type_name = ((action_type==0)?"支出":"收入");
+
+					//对支出和收入进行累加
+					if(action_type==0){
+						pay+=bill.getMoney();
+					}else if (action_type==1){
+						get+=bill.getMoney();
+					}else {
+						System.out.println("账单累加异常");
+					}
+					break;
+				}
+			}
+
+            all=get-pay;
+            rowV.add(bill.getId().toString());
+            rowV.add(DateConverUtils.convertDateToString(bill.getDate()));
+            rowV.add(action_type_name);
+			rowV.add(action_name);
+            rowV.add(bill.getNote());
+			rowV.add(bill.getMoney().toString());
             tv.add(rowV);
             
 		}
@@ -354,7 +383,6 @@ public class BillQueryUI extends JDialog{
         jAll.setText("  共计:  "+all+"元");
 		return tv;
 	}
-	
 	class MyJtable extends JTable{
 		@Override
 		public boolean isCellEditable(int row, int column) {

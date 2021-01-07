@@ -1,4 +1,4 @@
-package com.ui;
+package com.ui.PersonalInfo;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -25,9 +25,13 @@ import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
 import com.beans.User;
-import com.biz.UserBiz;
 
+import com.service.UserService;
+import com.utils.UiUtils;
 
+/**
+ * 展示个人信息页面
+ */
 public class PersonalUi extends JDialog {
 	User user=new User();
 	User loginUser=null;
@@ -74,7 +78,7 @@ public class PersonalUi extends JDialog {
 	}
 	public JPanel setNorth() {
 		JPanel jPanelNorth=new JPanel(new FlowLayout(FlowLayout.CENTER,20,20));
-        jPanelNorth.add(Ctrols.getTitleLabel("个人信息"));
+        jPanelNorth.add(UiUtils.getTitleLabel("个人信息"));
         return jPanelNorth;
 	}
 	
@@ -82,15 +86,15 @@ public class PersonalUi extends JDialog {
 		JPanel jPs = new JPanel(new GridLayout(2,1,0,10));
 		JPanel jpL1=new JPanel(new FlowLayout(FlowLayout.CENTER,30,10));
 		jPs.add(jpL1);
-		jPs.add(Ctrols.getLabel(""));
-		JButton jb = Ctrols.getButton("保存");
+		jPs.add(UiUtils.getLabel(""));
+		JButton jb = UiUtils.getButton("保存");
 		jb.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO 自动生成的方法存根
 				if(flag1&&flag2) {
-					UserBiz.modifyInfo(user);
+					UserService.modifyInfo(user);
 					loginUser=user;
 					JOptionPane.showMessageDialog(null, "修改成功");
 				}else {
@@ -99,7 +103,7 @@ public class PersonalUi extends JDialog {
 				
 			}
 		});
-		JButton je=Ctrols.getButton("返回");
+		JButton je= UiUtils.getButton("返回");
 		je.addActionListener(new ActionListener() {
 			
 			@Override
@@ -116,23 +120,23 @@ public class PersonalUi extends JDialog {
 		JPanel jpF = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
 		JPanel jpc1 = new JPanel(new GridLayout(6, 1, 50, 60));
 		JPanel jpc2 = new JPanel(new GridLayout(6, 2, 50, 50));
-		jpc1.add(Ctrols.getLabel("用户名:", new Font("微软雅黑", Font.PLAIN, 18),SwingConstants.LEFT));
-		jpc1.add(Ctrols.getLabel("密    码:", new Font("微软雅黑", Font.PLAIN, 18),SwingConstants.LEFT));
-		jpc1.add(Ctrols.getLabel("性别:", new Font("微软雅黑", Font.PLAIN, 18),SwingConstants.LEFT));
-		jpc1.add(Ctrols.getLabel("年龄:", new Font("微软雅黑", Font.PLAIN, 18),SwingConstants.LEFT));
-		jpc1.add(Ctrols.getLabel("手机号:", new Font("微软雅黑", Font.PLAIN, 18),SwingConstants.LEFT));
+		jpc1.add(UiUtils.getLabel("用户名:", new Font("微软雅黑", Font.PLAIN, 18),SwingConstants.LEFT));
+		jpc1.add(UiUtils.getLabel("密    码:", new Font("微软雅黑", Font.PLAIN, 18),SwingConstants.LEFT));
+		jpc1.add(UiUtils.getLabel("性别:", new Font("微软雅黑", Font.PLAIN, 18),SwingConstants.LEFT));
+		jpc1.add(UiUtils.getLabel("年龄:", new Font("微软雅黑", Font.PLAIN, 18),SwingConstants.LEFT));
+		jpc1.add(UiUtils.getLabel("手机号:", new Font("微软雅黑", Font.PLAIN, 18),SwingConstants.LEFT));
 		
 		
 		JLabel[] jmsg = new JLabel[5];
 		for (int i = 0; i < 5; i++) {
-			jmsg[i] = Ctrols.getLabel(" ");
+			jmsg[i] = UiUtils.getLabel(" ");
 			jmsg[i].setHorizontalAlignment(JLabel.LEFT);
 		}
-		JTextField jtUserName = Ctrols.getJTextField(user.getUser_name());
+		JTextField jtUserName = UiUtils.getJTextField(user.getUser_name());
 		jtUserName.setEnabled(false);
 		jpc2.add(jtUserName);
 		jpc2.add(jmsg[0]);
-		JButton jbalterPassword=Ctrols.getButton("修改密码");
+		JButton jbalterPassword= UiUtils.getButton("修改密码");
 		jbalterPassword.addActionListener(new ActionListener() {
 			
 			@Override
@@ -182,7 +186,7 @@ public class PersonalUi extends JDialog {
 		jpc2.add(jrb1);
 		jpc2.add(jrb2);
 		
-		JTextField jtAge = Ctrols.getJTextField(user.getUser_age().toString());
+		JTextField jtAge = UiUtils.getJTextField(user.getUser_age().toString());
 		jtAge.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
@@ -206,7 +210,7 @@ public class PersonalUi extends JDialog {
 		jpc2.add(jtAge);
 		jpc2.add(jmsg[3]);
 	
-		JTextField jtPhone = Ctrols.getJTextField(user.getUser_phone());
+		JTextField jtPhone = UiUtils.getJTextField(user.getUser_phone());
 		jtPhone.setColumns(10);
 		jtPhone.addFocusListener(new FocusAdapter() {
 			@Override

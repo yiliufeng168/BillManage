@@ -1,11 +1,13 @@
-package com.ui;
+package com.utils;
 
-
+/**
+ * 辅助工具类
+ */
 
 import javax.swing.*;
 import java.awt.*;
 
-public class Ctrols {
+public class UiUtils {
     public static Font f32=new Font("微软雅黑",Font.BOLD,32);
     public static Font f24=new Font("微软雅黑",Font.PLAIN,24);
     public static Font f16=new Font("微软雅黑",Font.BOLD,16);

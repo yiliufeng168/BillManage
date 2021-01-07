@@ -1,4 +1,4 @@
-package com.ui;
+package com.ui.PersonalInfo;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -22,13 +22,17 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
-import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
 import com.beans.User;
-import com.biz.UserBiz;
 
+import com.service.UserService;
+import com.utils.UiUtils;
+
+/**
+ * 修改密码页面
+ */
 public class ModifyPasswordUi extends JDialog {
 	JFrame fatherJframe;
 	User user = new User();
@@ -70,15 +74,15 @@ public class ModifyPasswordUi extends JDialog {
 		JPanel jPs = new JPanel(new GridLayout(2,1,0,10));
 		JPanel jpL1=new JPanel(new FlowLayout(FlowLayout.CENTER,30,10));
 		jPs.add(jpL1);
-		jPs.add(Ctrols.getLabel(""));
-		JButton jb = Ctrols.getButton("确认");
+		jPs.add(UiUtils.getLabel(""));
+		JButton jb = UiUtils.getButton("确认");
 		jb.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
 
 				if(flag1&&flag2) {
-					user.setUser_password(UserBiz.modifyPassword(user));
+					user.setUser_password(UserService.modifyPassword(user));
 					JOptionPane.showMessageDialog(null, "修改成功");
 					ModifyPasswordUi.this.dispose();
 				}else {
@@ -86,7 +90,7 @@ public class ModifyPasswordUi extends JDialog {
 				}
 			}
 		});
-		JButton je=Ctrols.getButton("取消");
+		JButton je= UiUtils.getButton("取消");
 		je.addActionListener(new ActionListener() {
 			
 			@Override
@@ -107,13 +111,13 @@ public class ModifyPasswordUi extends JDialog {
 		JPanel jpc2 = new JPanel(new GridLayout(2, 2, 0, 50));
 
 
-		jpc1.add(Ctrols.getLabel("新的密码:", new Font("微软雅黑", Font.PLAIN, 18)));
-		jpc1.add(Ctrols.getLabel("确认密码:", new Font("微软雅黑", Font.PLAIN, 18)));
+		jpc1.add(UiUtils.getLabel("新的密码:", new Font("微软雅黑", Font.PLAIN, 18)));
+		jpc1.add(UiUtils.getLabel("确认密码:", new Font("微软雅黑", Font.PLAIN, 18)));
 
 
-		JLabel jmsg1 = Ctrols.getLabel("   ");
-		JLabel jmsg2 = Ctrols.getLabel("   ");
-		JPasswordField jtpa = Ctrols.getJPasswordField();
+		JLabel jmsg1 = UiUtils.getLabel("   ");
+		JLabel jmsg2 = UiUtils.getLabel("   ");
+		JPasswordField jtpa = UiUtils.getJPasswordField();
 		jtpa.setColumns(12);
 		jtpa.addFocusListener(new FocusAdapter() {
 			@Override
@@ -133,7 +137,7 @@ public class ModifyPasswordUi extends JDialog {
 		});
 		jpc2.add(jtpa);
 		jpc2.add(jmsg1);
-		JPasswordField jtpaCheck = Ctrols.getJPasswordField();
+		JPasswordField jtpaCheck = UiUtils.getJPasswordField();
 		jtpaCheck.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
@@ -165,7 +169,7 @@ public class ModifyPasswordUi extends JDialog {
 
 	private JPanel setNorth() {
 		JPanel jPanelNorth = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
-		jPanelNorth.add(Ctrols.getTitleLabel("修改密码"));
+		jPanelNorth.add(UiUtils.getTitleLabel("修改密码"));
 		return jPanelNorth;
 	}
 
